@@ -4,3 +4,9 @@
 *.csv
 .csv
 
+# IDE / editor
+.Rproj.user
+
+# R session + history
+.Rhistory
+.RData
