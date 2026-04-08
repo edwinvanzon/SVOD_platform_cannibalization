@@ -39,7 +39,7 @@ week_data %>%
 
 # Correlation matrix
 cor_matrix <- cor(titles %>%
-                    select(n_releases, viewing_7days, original, n_genres_week, IMDb_rating, tmdb_popularity),
+                    select(n_releases_window, viewing_7days, original, n_genres_week, IMDb_rating, tmdb_popularity),
                   use = "complete.obs")
 
 cor(week_data %>%
