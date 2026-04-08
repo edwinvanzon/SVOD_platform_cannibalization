@@ -7,4 +7,6 @@
 # R session + history
 .Rhistory
 .RData
-Data.Rproj
+
+#IDE / editor
+*.Rproj
