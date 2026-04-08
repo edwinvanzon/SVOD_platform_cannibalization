@@ -10,3 +10,4 @@
 
 #IDE / editor
 *.Rproj
+.Rproj.user
