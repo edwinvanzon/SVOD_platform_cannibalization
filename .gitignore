@@ -1,0 +1,6 @@
+# Ignore all data files
+*.tsv
+.tsv
+*.csv
+.csv
+
