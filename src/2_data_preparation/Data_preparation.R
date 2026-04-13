@@ -24,6 +24,19 @@ titles <- titles %>%
     releases$release_day <= window_end
   )) %>% ungroup()
 
+# Create # releases in 7 days prior to release
+titles <- titles %>% 
+  mutate(prev_window_start = release_day - 7,
+         prev_window_end = release_day -1)
+
+titles <- titles %>%
+  rowwise() %>%
+  mutate(n_releases_prev7 = sum(
+    releases$release_day >= prev_window_start &
+      releases$release_day <= prev_window_end
+  )) %>%
+  ungroup()
+
 # Create weeks as release periods
 titles <- titles %>%
   mutate(week = lubridate::floor_date(as.Date(release_day), "week")) %>%
@@ -59,23 +72,38 @@ hhi_data <- genres_window %>%
 titles <- titles %>% 
   left_join(hhi_data, by = c('obs_id' = 'focal_obs_id'))
 
+# Create seasonality variable
+titles <- titles %>%
+  mutate(year_month = factor(format(as.Date(release_day), "%Y-%m")))
+
+# Create weeks as release periods
+titles <- titles %>%
+  mutate(week = lubridate::floor_date(as.Date(release_day), "week")) %>%
+  arrange(week) %>%
+  mutate(week_id = as.numeric(factor(week))) %>%
+  group_by(week_id) %>%
+  mutate(n_releases_week = n()) %>%
+  ungroup()
+
 # Order weekly data
 week_data <- titles %>%
-  group_by(week_id) %>%
-  summarise(n_releases = first(n_releases))
+  distinct(week_id, week, n_releases_week)
 
-week_data <- titles %>%
-  group_by(week_id, week) %>%
-  summarise(
-    n_releases = first(n_releases),
-    total_views = sum(viewing_7days, na.rm = TRUE),
-    original_ratio = mean(original, na.rm = TRUE),
-    licensed_ratio = 1 - mean(original, na.rm = TRUE),
-    n_genres_week = first(n_genres_week),
-    avg_imdb_rating = mean(IMDb_rating, na.rm = TRUE),
-    avg_tmdb_popularity = mean(tmdb_popularity, na.rm = TRUE)
-  ) %>%
-  mutate(
-    avg_views_per_title = total_views/n_releases,
-  ) %>% 
-  ungroup()
+
+# Restructure the titles dataset
+titles <- titles %>% 
+  select(
+    imdb_id, service, original, release_day, viewing_7days,
+    
+    window_start, window_end, n_releases_window,
+    genres, hhi, variety,
+    
+    prev_window_start, prev_window_end, n_releases_prev7,
+    
+    IMDb_rating, media_type,
+    
+    year_month,
+    
+    tmdb_popularity,
+    
+    week, week_id, n_releases_week, obs_id)
