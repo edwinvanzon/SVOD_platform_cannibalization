@@ -61,7 +61,6 @@ figure_1 <- week_data %>%
   theme_minimal()
 figure_1
 
-
 # Average views per release window H1
 window_data <- titles %>%
   select(window_start, window_end, n_releases_window) %>%
@@ -99,8 +98,7 @@ figure_3 <- titles %>% ggplot(aes(x = viewing_7days)) +
     x = "Views (7 days)",
     y = "Frequency") +
   theme_minimal()
-
-rm(figure_5)
+figure_3
 
 # Saving figures
 ggsave("src/output/figure_1.png", plot = figure_1, width = 8, height = 6)
