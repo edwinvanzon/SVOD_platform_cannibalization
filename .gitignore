@@ -11,3 +11,6 @@
 #IDE / editor
 *.Rproj
 .Rproj.user
+
+#Excel output for word file
+*.xlsx
