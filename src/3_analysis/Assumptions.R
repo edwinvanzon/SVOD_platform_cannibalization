@@ -1,5 +1,5 @@
 # Log transform the DV
-titles <- titles %>% 
+titles7 <- titles7 %>% 
   mutate(log_viewing_7days = log(viewing_7days)) 
 
 # Check the model
@@ -11,16 +11,13 @@ model <- lm(log_viewing_7days ~
               n_releases_window:variety +
               IMDb_rating +
               media_type +
-              n_releases_prev7 +
               factor(service) +
               factor(year_month),
-            data = titles)
+            data = titles7)
 
 model
 
 summary(model)
-tidy(model)
-glance(model)
 
 # 1. Check for linearity
 plot(model, which = 1)
@@ -30,19 +27,20 @@ plot(model, which = 1)
 dev.off()
 
 # 2. Check for independence
+#durbin-watson test
 dwtest(model)
 
-coeftest(model, vcov = vcovCL(model, cluster = ~ window_start))
+#clustered model
+coeftest(model, vcov = vcovCL(model, cluster = ~ week))
 
-plot(titles$window_start, resid(model))
+plot(titles7$week, resid(model))
 png("src/output/figure_5.png", width = 800, height = 600)
-plot(titles$window_start, resid(model))
+plot(titles7$week, resid(model))
 dev.off()
 
 # 3. Homoscedasticity
+#Breusch-Pagan test
 bptest(model)
-
-coeftest(model, vcov = vcovCL(model, cluster = ~ window_start))
 
 # 4. Normality
 ##Q-Q plot

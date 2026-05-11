@@ -1,19 +1,17 @@
 # Descriptives
-summary(titles)
+summary(titles7)
 
-titles %>%
+titles7 %>%
   summarise(
     mean_views = mean(viewing_7days, na.rm = TRUE),
     sd_views = sd(viewing_7days, na.rm = TRUE),
+    median_views = median(viewing_7days, na.rm = TRUE),
     
     mean_releases = mean(n_releases_window, na.rm = TRUE),
     sd_releases = sd(n_releases_window, na.rm = TRUE),
     
     mean_variety = mean(variety, na.rm = TRUE),
     sd_variety = sd(variety, na.rm = TRUE),
-    
-    mean_prev_releases = mean(n_releases_prev7, na.rm = TRUE),
-    sd_prev_releases = sd(n_releases_prev7, na.rm = TRUE),
     
     mean_rating = mean(IMDb_rating, na.rm = TRUE),
     sd_rating = sd(IMDb_rating, na.rm = TRUE),
@@ -24,25 +22,26 @@ titles %>%
   print(., width = Inf)
 
 #check the ratio of movies and series
-titles %>% 
+titles7 %>% 
   group_by(media_type) %>% 
-  summarise(n = n(), percentage = n / nrow(titles))
+  summarise(n = n(), percentage = n / nrow(titles7))
 
 #Check the ratio for SVOD platforms in the dataset
-titles %>%
+titles7 %>%
   group_by(service) %>%
-  summarise(n = n(),percentage = n / nrow(titles))
+  summarise(n = n(),percentage = n / nrow(titles7))
 
 
 # Correlation matrix
 cor_matrix <- cor(
-  titles %>% 
+  titles7 %>% 
+    mutate(media_type = as.numeric(media_type == "tv")) %>% 
     select(n_releases_window,
            viewing_7days,
            original,
            variety,
            IMDb_rating,
-           n_releases_prev7),
+           media_type),
   use = "complete.obs")
 
   
@@ -62,13 +61,13 @@ figure_1 <- week_data %>%
 figure_1
 
 # Average views per release window H1
-window_data <- titles %>%
+window_data <- titles7 %>%
   select(window_start, window_end, n_releases_window) %>%
   distinct()
 
 window_data <- window_data %>%
   left_join(
-    titles %>% select(release_day, viewing_7days),
+    titles7 %>% select(release_day, viewing_7days),
     by = character()
   ) %>%
   filter(release_day >= window_start & release_day <= window_end)
@@ -92,7 +91,7 @@ figure_2
 
 
 # histogram
-figure_3 <- titles %>% ggplot(aes(x = viewing_7days)) +
+figure_3 <- titles7 %>% ggplot(aes(x = viewing_7days)) +
   geom_histogram(bins = 30, fill = "gray", color = "white") +
   labs(title = "Distribution of Views per Title",
     x = "Views (7 days)",
