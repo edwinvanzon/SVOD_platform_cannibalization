@@ -1,5 +1,5 @@
 # Log transform the DV
-titles7 <- titles7 %>% 
+titles <- titles %>% 
   mutate(log_viewing_7days = log(viewing_7days)) 
 
 # Check the model
@@ -13,7 +13,7 @@ model <- lm(log_viewing_7days ~
               media_type +
               factor(service) +
               factor(year_month),
-            data = titles7)
+            data = titles)
 
 model
 
@@ -33,9 +33,9 @@ dwtest(model)
 #clustered model
 coeftest(model, vcov = vcovCL(model, cluster = ~ week))
 
-plot(titles7$week, resid(model))
+plot(titles$week, resid(model))
 png("src/output/figure_5.png", width = 800, height = 600)
-plot(titles7$week, resid(model))
+plot(titles$week, resid(model))
 dev.off()
 
 # 3. Homoscedasticity

@@ -1,3 +1,5 @@
+##########################
+# Check the best model fit
 # Model 1 - Baseline with control variables
 model_1 <- lm(log_viewing_7days ~
                 n_releases_window +
@@ -5,7 +7,7 @@ model_1 <- lm(log_viewing_7days ~
                 variety +
                 IMDb_rating +
                 media_type,
-              data = titles7)
+              data = titles)
 
 # Model 2 - Baseline with control variables and fixed effects
 model_2 <- lm(log_viewing_7days ~
@@ -16,7 +18,7 @@ model_2 <- lm(log_viewing_7days ~
                 media_type +
                 factor(service) +
                 factor(year_month),
-              data = titles7)
+              data = titles)
 
 # Model 3 - Initial model
 model_3 <- model
@@ -38,7 +40,7 @@ model_fit <- tibble(
 
 model_fit
 
-
+##########
 #Estimates
 model_clustered <- coeftest(model, vcov = vcovCL(model, cluster = ~ week))
 
@@ -58,11 +60,10 @@ model_df$Signif <- symnum(model_df$`Pr(>|t|)`,
                        cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1),
                        symbols = c("***", "**", "*", ".", ""))
 
-write_xlsx(model_df, "clustered_lm_table.xlsx")
+write_xlsx(model_df, "src/output/clustered_lm_table.xlsx")
 
-
+############################################################
 #Interaction plots
-
 # Plot 1: Moderation of Title Type (Original vs. Licensed)
 releases_seq <- seq(5, 45, by = 1)
 
@@ -123,7 +124,7 @@ df_var <- data.frame(
 
 df_var$n_releases_window <- df_var$releases
 df_var$original <- 0
-df_var$IMDb_rating <- mean(titles7$IMDb_rating)
+df_var$IMDb_rating <- mean(titles$IMDb_rating)
 df_var$media_type <- "movie"
 df_var$service <- "amazon"
 df_var$year_month <- "2020-01"
@@ -174,6 +175,7 @@ plot2 <- ggplot(df_var, aes(x = releases, y = log_views,
 
 plot2
 
+# Save the plots
 ggsave("src/output/plot_titletype_interaction.png", plot1, width = 7, height = 5, dpi = 300)
 ggsave("src/output/plot_variety_interaction.png", plot2, width = 7, height = 5, dpi = 300)
 

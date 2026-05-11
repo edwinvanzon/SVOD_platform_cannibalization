@@ -1,7 +1,8 @@
+##############
 # Descriptives
-summary(titles7)
+summary(titles)
 
-titles7 %>%
+titles %>%
   summarise(
     mean_views = mean(viewing_7days, na.rm = TRUE),
     sd_views = sd(viewing_7days, na.rm = TRUE),
@@ -21,20 +22,20 @@ titles7 %>%
   
   print(., width = Inf)
 
-#check the ratio of movies and series
-titles7 %>% 
+# Check the ratio of movies and series
+titles %>% 
   group_by(media_type) %>% 
-  summarise(n = n(), percentage = n / nrow(titles7))
+  summarise(n = n(), percentage = n / nrow(titles))
 
-#Check the ratio for SVOD platforms in the dataset
-titles7 %>%
+# Check the ratio for SVOD platforms in the dataset
+titles %>%
   group_by(service) %>%
-  summarise(n = n(),percentage = n / nrow(titles7))
+  summarise(n = n(),percentage = n / nrow(titles))
 
 
 # Correlation matrix
 cor_matrix <- cor(
-  titles7 %>% 
+  titles %>% 
     mutate(media_type = as.numeric(media_type == "tv")) %>% 
     select(n_releases_window,
            viewing_7days,
@@ -44,7 +45,7 @@ cor_matrix <- cor(
            media_type),
   use = "complete.obs")
 
-  
+################### 
 # Figures
 # releases per week
 mean_releases <- mean(week_data$n_releases_week)
@@ -61,13 +62,13 @@ figure_1 <- week_data %>%
 figure_1
 
 # Average views per release window H1
-window_data <- titles7 %>%
+window_data <- titles %>%
   select(window_start, window_end, n_releases_window) %>%
   distinct()
 
 window_data <- window_data %>%
   left_join(
-    titles7 %>% select(release_day, viewing_7days),
+    titles %>% select(release_day, viewing_7days),
     by = character()
   ) %>%
   filter(release_day >= window_start & release_day <= window_end)
@@ -91,7 +92,7 @@ figure_2
 
 
 # histogram
-figure_3 <- titles7 %>% ggplot(aes(x = viewing_7days)) +
+figure_3 <- titles %>% ggplot(aes(x = viewing_7days)) +
   geom_histogram(bins = 30, fill = "gray", color = "white") +
   labs(title = "Distribution of Views per Title",
     x = "Views (7 days)",
