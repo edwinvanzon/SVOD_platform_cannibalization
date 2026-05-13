@@ -74,7 +74,7 @@ df_type <- data.frame(
 
 df_type$n_releases_window <- df_type$releases
 df_type$original <- ifelse(df_type$title_type == "Original", 1, 0)
-df_type$variety <- 0.89
+df_type$variety <- 0.898
 df_type$IMDb_rating <- 0
 df_type$media_type <- "movie"
 df_type$service <- "amazon"
@@ -113,8 +113,8 @@ plot1
 
 
 # Plot 2: Moderation of Content Variety with confidence intervals
-variety_levels <- c(0.86, 0.89, 0.92)
-variety_labels <- c("Low (0.86)", "Mean (0.89)", "High (0.92)")
+variety_levels <- c(0.8839, 0.898, 0.9121)
+variety_labels <- c("Low (0.8839)", "Mean (0.898)", "High (0.9121)")
 
 df_var <- data.frame(
   releases = rep(releases_seq, length(variety_levels)),
@@ -142,19 +142,19 @@ plot2 <- ggplot(df_var, aes(x = releases, y = log_views,
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.15, color = NA) +
   geom_line(linewidth = 1.1) +
   scale_color_manual(values = c(
-    "Low (0.86)"  = "#C0392B",
-    "Mean (0.89)" = "#7F8C8D",
-    "High (0.92)" = "#27AE60"
+    "Low (0.8839)"  = "#C0392B",
+    "Mean (0.898)" = "#7F8C8D",
+    "High (0.9121)" = "#27AE60"
   )) +
   scale_fill_manual(values = c(
-    "Low (0.86)"  = "#C0392B",
-    "Mean (0.89)" = "#7F8C8D",
-    "High (0.92)" = "#27AE60"
+    "Low (0.8839)"  = "#C0392B",
+    "Mean (0.898)" = "#7F8C8D",
+    "High (0.9121)" = "#27AE60"
   )) +
   scale_linetype_manual(values = c(
-    "Low (0.86)"  = "dashed",
-    "Mean (0.89)" = "dotdash",
-    "High (0.92)" = "solid"
+    "Low (0.8839)"  = "dashed",
+    "Mean (0.898)" = "dotdash",
+    "High (0.9121)" = "solid"
   )) +
   guides(fill = "none") +
   labs(

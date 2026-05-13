@@ -22,25 +22,21 @@ titles <- titles %>%
 # Main model: 7 days prior and 7 days after release
 titles <- titles %>% 
   mutate(window_start = release_day - 7,
-         window_end = release_day + 7)
+         window_end = release_day + 6)
 
 # Robustness 1: 7 days after and 7 days before as control variable
 titles <- titles %>%
   mutate(
-    window_after7_start = release_day,
-    window_after7_end   = release_day + 7,
+    window_after7_start = release_day ,
+    window_after7_end   = release_day + 6,
     window_before7_start = release_day - 7,
     window_before7_end   = release_day
   )
 
-# Robustness 2: 14 days after and 14 days before as control variable
-titles <- titles %>%
-  mutate(
-    window_after14_start = release_day,
-    window_after14_end   = release_day + 14,
-    window_before14_start = release_day - 14,
-    window_before14_end   = release_day
-  )
+# Exploratory analysis: day -13 to day 14
+titles <- titles %>% 
+  mutate(window14_start = release_day - 14,
+         window14_end = release_day + 13)
 
 ################################################
 # Count the number of releases per release window
@@ -59,13 +55,9 @@ titles <- titles %>%
       releases$release_day >= window_before7_start &
       releases$release_day <= window_before7_end
     ),
-    n_releases_after14 = sum(
-      releases$release_day >= window_after14_start &
-      releases$release_day <= window_after14_end
-    ),
-    n_releases_before14 = sum(
-      releases$release_day >= window_before14_start &
-      releases$release_day <= window_before14_end
+    n_releases_window14 = sum(
+      releases$release_day >= window14_start &
+      releases$release_day <= window14_end
       )) %>% ungroup()
 
 
@@ -79,7 +71,7 @@ genres_long <- titles %>%
   separate_rows(genres, sep = ",")
 
 
-# Main model: +-7 days
+# Main model: day -6 to day 7
 windows <- titles %>%
   select(focal_obs_id = obs_id, window_start, window_end)
 
@@ -117,24 +109,24 @@ hhi_data_after7 <- genres_window_after7 %>%
 titles <- titles %>% 
   left_join(hhi_data_after7, by = c('obs_id' = 'focal_obs_id'))
 
-# Robustness 2: 14 days after
-windows_after14 <- titles %>%
-  select(focal_obs_id = obs_id, window_start = window_after14_start, window_end = window_after14_end)
+# Exploratory analysis: day -13 to day 14
+windows14 <- titles %>%
+  select(focal_obs_id = obs_id, window_start = window14_start, window_end = window14_end)
 
-genres_window_after14 <- windows_after14 %>%
+genres_window14 <- windows14 %>%
   left_join(genres_long, by = character()) %>%
   filter(release_day >= window_start & release_day <= window_end)
 
-hhi_data_after14 <- genres_window_after14 %>%
+hhi_data14 <- genres_window14 %>%
   group_by(focal_obs_id, genres) %>%
   summarise(n = n(), .groups = "drop") %>%
   group_by(focal_obs_id) %>%
   mutate(share = n / sum(n)) %>%
-  summarise(hhi_after14 = sum(share^2), .groups = "drop") %>%
-  mutate(variety_after14 = 1 - hhi_after14)
+  summarise(hhi14 = sum(share^2), .groups = "drop") %>%
+  mutate(variety14 = 1 - hhi14)
 
 titles <- titles %>% 
-  left_join(hhi_data_after14, by = c('obs_id' = 'focal_obs_id'))
+  left_join(hhi_data14, by = c('obs_id' = 'focal_obs_id'))
 
 ##############################
 # Create seasonality variable
@@ -167,9 +159,8 @@ titles <- titles %>%
     hhi_after7, variety_after7,
     window_before7_start, window_before7_end, n_releases_before7,
     
-    window_after14_start, window_after14_end, n_releases_after14,
-    hhi_after14, variety_after14,
-    window_before14_start, window_before14_end, n_releases_before14,    
+    window14_start, window14_end, n_releases_window14,
+    hhi14, variety14,
     
     IMDb_rating, media_type,
     year_month,
@@ -179,13 +170,13 @@ titles <- titles %>%
 min_date <- min(releases$release_day)
 max_date <- max(releases$release_day)
 
-# Robstness 2:
+# Explanatory analysis:
 # Select only titles in the dataset that have 14 days before or 14 days after the release available
 
-titles_r2 <- titles %>% 
+titles_ea <- titles %>% 
   filter(
     release_day >= min_date + 14,
-    release_day <= max_date -14
+    release_day <= max_date -13
   )
 
 # Main model and robustness 1:
@@ -193,5 +184,5 @@ titles_r2 <- titles %>%
 titles <- titles %>%
   filter(
     release_day >= min_date + 7,
-    release_day <= max_date - 7
+    release_day <= max_date - 6
   )
