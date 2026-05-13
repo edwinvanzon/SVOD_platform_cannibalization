@@ -22,7 +22,7 @@ summary(model)
 # 1. Check for linearity
 plot(model, which = 1)
 
-png("src/output/figure_4.png", width = 800, height = 600)
+png("src/output/figure_4_plot.png", width = 800, height = 600)
 plot(model, which = 1)
 dev.off()
 
@@ -34,7 +34,7 @@ dwtest(model)
 coeftest(model, vcov = vcovCL(model, cluster = ~ week))
 
 plot(titles$week, resid(model))
-png("src/output/figure_5.png", width = 800, height = 600)
+png("src/output/figure_5_plot_residuals.png", width = 800, height = 600)
 plot(titles$week, resid(model))
 dev.off()
 
@@ -46,7 +46,7 @@ bptest(model)
 ##Q-Q plot
 plot(model, which = 2)
 
-png("src/output/figure_6.png", width = 800, height = 600)
+png("src/output/figure_6_Q_Q_plot.png", width = 800, height = 600)
 plot(model, which = 2)
 dev.off()
 
@@ -69,7 +69,7 @@ figure_7 <- ggplot(residual_data, aes(x = residuals)) +
   theme_minimal()
 figure_7
 
-ggsave("src/output/figure_7.png", plot = figure_7, width = 8, height = 6)
+ggsave("src/output/figure_7_normality_histogram.png", plot = figure_7, width = 8, height = 6)
 
 ##shapiro test
 shapiro.test(resid(model))

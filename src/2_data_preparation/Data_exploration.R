@@ -101,6 +101,6 @@ figure_3 <- titles %>% ggplot(aes(x = viewing_7days)) +
 figure_3
 
 # Saving figures
-ggsave("src/output/figure_1.png", plot = figure_1, width = 8, height = 6)
-ggsave("src/output/figure_2.png", plot = figure_2, width = 8, height = 6)
-ggsave("src/output/figure_3.png", plot = figure_3, width = 8, height = 6)
+ggsave("src/output/figure_1_releases_per_week.png", plot = figure_1, width = 8, height = 6)
+ggsave("src/output/figure_2_avg_views_releasewindow.png", plot = figure_2, width = 8, height = 6)
+ggsave("src/output/figure_3_histogram.png", plot = figure_3, width = 8, height = 6)
