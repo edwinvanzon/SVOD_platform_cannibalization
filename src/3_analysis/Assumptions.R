@@ -15,7 +15,6 @@ model <- lm(log_viewing_7days ~
               factor(year_month),
             data = titles)
 
-model
 
 summary(model)
 

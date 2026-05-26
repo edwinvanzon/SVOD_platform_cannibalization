@@ -17,7 +17,7 @@ titles <- releases %>%
 titles <- titles %>% 
   rename(IMDb_rating = averageRating)
 
-########################
+#################################################
 # Create release windows
 # Main model: 7 days prior and 7 days after release
 titles <- titles %>% 
@@ -70,7 +70,6 @@ genres_long <- titles %>%
   select(window_title_id = obs_id, release_day, genres) %>%
   separate_rows(genres, sep = ",")
 
-
 # Main model: day -6 to day 7
 windows <- titles %>%
   select(focal_obs_id = obs_id, window_start, window_end)
@@ -90,7 +89,7 @@ hhi_data <- genres_window %>%
 titles <- titles %>% 
   left_join(hhi_data, by = c('obs_id' = 'focal_obs_id'))
 
-# Robustness 1: 7 days after
+#Variety for 7 days after
 windows_after7 <- titles %>%
   select(focal_obs_id = obs_id, window_start = window_after7_start, window_end = window_after7_end)
 
@@ -109,7 +108,26 @@ hhi_data_after7 <- genres_window_after7 %>%
 titles <- titles %>% 
   left_join(hhi_data_after7, by = c('obs_id' = 'focal_obs_id'))
 
-# Exploratory analysis: day -13 to day 14
+#Variety for 7 days prior
+windows_before7 <- titles %>% 
+  select(focal_obs_id = obs_id, window_start = window_before7_start, window_end = window_before7_end)
+
+genres_window_before7 <- windows_before7 %>% 
+  left_join(genres_long, by = character()) %>% 
+  filter(release_day >= window_start & release_day <= window_end)
+
+hhi_data_before7 <- genres_window_before7 %>% 
+  group_by(focal_obs_id, genres) %>% 
+  summarise(n = n(), .groups = "drop") %>% 
+  group_by(focal_obs_id) %>% 
+  mutate(share = n / sum(n)) %>% 
+  summarise(hhi_before7 = sum(share^2), .groups = "drop") %>% 
+  mutate(variety_before7 = 1 - hhi_before7)
+
+titles <- titles %>% 
+  left_join(hhi_data_before7, by = c('obs_id' = 'focal_obs_id'))
+
+# Variety for day -13 to day 14
 windows14 <- titles %>%
   select(focal_obs_id = obs_id, window_start = window14_start, window_end = window14_end)
 
@@ -128,7 +146,7 @@ hhi_data14 <- genres_window14 %>%
 titles <- titles %>% 
   left_join(hhi_data14, by = c('obs_id' = 'focal_obs_id'))
 
-##############################
+##########################################################
 # Create seasonality variable
 titles <- titles %>%
   mutate(year_month = factor(format(as.Date(release_day), "%Y-%m")))
@@ -146,7 +164,7 @@ titles <- titles %>%
 week_data <- titles %>%
   distinct(week_id, week, n_releases_week)
 
-################################
+###########################################################
 # Restructure the titles dataset
 titles <- titles %>% 
   select(
@@ -158,6 +176,7 @@ titles <- titles %>%
     window_after7_start, window_after7_end, n_releases_after7,
     hhi_after7, variety_after7,
     window_before7_start, window_before7_end, n_releases_before7,
+    hhi_before7, variety_before7,
     
     window14_start, window14_end, n_releases_window14,
     hhi14, variety14,
@@ -166,20 +185,20 @@ titles <- titles %>%
     year_month,
     week, week_id, n_releases_week, obs_id)
 
-#####################################
+###########################################################
 min_date <- min(releases$release_day)
 max_date <- max(releases$release_day)
 
-# Explanatory analysis:
+# Robustness check:
 # Select only titles in the dataset that have 14 days before or 14 days after the release available
 
-titles_ea <- titles %>% 
+titles_rc <- titles %>% 
   filter(
     release_day >= min_date + 14,
     release_day <= max_date -13
   )
 
-# Main model and robustness 1:
+# Main model and Exploratory Analysis:
 # Select only titles in the dataset that have 7 days before or 7 days after the release available
 titles <- titles %>%
   filter(

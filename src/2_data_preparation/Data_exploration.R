@@ -1,12 +1,16 @@
-##############
+#################################################
 # Descriptives
 summary(titles)
 
 titles %>%
+  mutate(log_viewing_7days = log(viewing_7days)) %>% 
   summarise(
     mean_views = mean(viewing_7days, na.rm = TRUE),
     sd_views = sd(viewing_7days, na.rm = TRUE),
     median_views = median(viewing_7days, na.rm = TRUE),
+    
+    mean_log_views = mean(log_viewing_7days, na.rm = TRUE),
+    sd_log_views = sd(log_viewing_7days, na.rm = TRUE),
     
     mean_releases = mean(n_releases_window, na.rm = TRUE),
     sd_releases = sd(n_releases_window, na.rm = TRUE),
@@ -36,20 +40,24 @@ titles %>%
 # Correlation matrix
 cor_matrix <- cor(
   titles %>% 
+    mutate(log_viewing_7days = log(viewing_7days)) %>% 
     mutate(media_type = as.numeric(media_type == "tv")) %>% 
     select(n_releases_window,
-           viewing_7days,
+           log_viewing_7days,
            original,
            variety,
            IMDb_rating,
            media_type),
   use = "complete.obs")
 
-################### 
+cor_matrix[upper.tri(cor_matrix)] <- NA
+print(cor_matrix)
+
+##################################################
 # Figures
 # releases per week
 mean_releases <- mean(week_data$n_releases_week)
-figure_1 <- week_data %>% 
+figure_2 <- week_data %>% 
   ggplot(aes(x = week_id, y = n_releases_week)) +
   geom_hline(yintercept = mean_releases, 
              linetype = "dashed", 
@@ -58,35 +66,6 @@ figure_1 <- week_data %>%
   labs(title = "Number of releases per week",
        x = "Week_id",
        y = "# releases") +
-  theme_minimal()
-figure_1
-
-# Average views per release window H1
-window_data <- titles %>%
-  select(window_start, window_end, n_releases_window) %>%
-  distinct()
-
-window_data <- window_data %>%
-  left_join(
-    titles %>% select(release_day, viewing_7days),
-    by = character()
-  ) %>%
-  filter(release_day >= window_start & release_day <= window_end)
-
-window_data <- window_data %>%
-  group_by(window_start, window_end, n_releases_window) %>%
-  summarise(
-    avg_views_per_title = mean(viewing_7days, na.rm = TRUE),
-    .groups = "drop"
-  )
-
-figure_2 <- window_data %>% 
-  ggplot(aes(x = n_releases_window, y = avg_views_per_title)) +
-  geom_point() +
-  geom_smooth(method = "lm", se = FALSE) +
-  labs(title = "Release Density and Average Views per Title within a release window",
-       x = "Number of Releases",
-       y = "Average Views per Title") +
   theme_minimal()
 figure_2
 
@@ -101,6 +80,6 @@ figure_3 <- titles %>% ggplot(aes(x = viewing_7days)) +
 figure_3
 
 # Saving figures
-ggsave("src/output/figure_1_releases_per_week.png", plot = figure_1, width = 8, height = 6)
-ggsave("src/output/figure_2_avg_views_releasewindow.png", plot = figure_2, width = 8, height = 6)
+ggsave("src/output/figure_2_releases_per_week.png", plot = figure_2, width = 8, height = 6)
 ggsave("src/output/figure_3_histogram.png", plot = figure_3, width = 8, height = 6)
+
